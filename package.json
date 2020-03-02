@@ -1,0 +1,54 @@
+{
+  "name": "node-red-contrib-canal",
+  "version": "1.0.0",
+  "description": "CANAL (CAN abstraction error) interface node for node-red",
+  "main": "index.js",
+  "scripts": {
+    "start": "mkdir -p .node-red/node_modules && ln -sf $PWD $PWD/.node-red/node_modules/node-red-contrib-canal && node-red -u .node-red",
+    "lint": "eslint .",
+    "update-dependencies": "ncu -u && npm install"
+  },
+  "node-red": {
+    "nodes": {
+      "canal": "src/canal.js",
+      "canaldrv-config": "src/canaldrv-config.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grodansparadis/node-red-contrib-canal.git"
+  },
+  "keywords": [
+    "node-red",
+    "canal",
+    "can",
+    "canbus",
+    "vscp",
+    "automation"
+  ],
+  "author": {
+    "name": "Ake Hedman, Grodans Paradis AB",
+    "email": "akhe@grodansparadis.com",
+    "url": "https://www.grodansparadis.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/grodansparadis/node-red-contrib-canal/issues"
+  },
+  "homepage": "https://github.com/grodansparadis/node-red-contrib-canal#readme",
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "node-canal": "^1.0.3",
+    "util": "^0.12.2"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "mocha": "^7.1.0",
+    "node-red": "^1.0.4",
+    "node-red-contrib-mock-node": "^0.4.0",
+    "node-red-node-test-helper": "^0.2.3",
+    "npm-check-updates": "^4.0.3",
+    "should": "^13.2.3"
+  }
+}

@@ -1,0 +1,103 @@
+<!--
+MIT License
+
+Copyright (c) 2020 Åke Hedman, Grodans Paradis AB
+
+This file is part of the VSCP (https://www.vscp.org)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<script type="text/html" data-template-name="canaldrv-config">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Driver name</label>
+        <input type="text" id="node-config-input-name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-filter_path"><i class="fa fa-filter"></i> Path to driver</label>
+        <input type="text" id="node-config-input-path">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-mask_configuration"><i class="fa fa-filter"></i> Configuration string</label>
+        <input type="text" id="node-config-input-config">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-flags"><i class="fa fa-filter"></i> Flags</label>
+        <input type="text" id="node-config-input-flags">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="canaldrv-config">
+    <p>Define a CANAL driver item.</p>
+    <p>Specify a CANAL driver with a specific setup.</p>
+
+    <h3>Name</h3>
+        <dl class="message-properties">
+            Set the name to a useful description of the CANAL driver.
+        </dl>
+
+    <h3>Path</h3>
+        <dl class="message-properties">
+            Path to CANAL driver.
+        </dl>
+    
+    <h3>Configuration</h3>
+        <dl class="message-properties">
+            Semicolon separated configuration string for CANAL driver. See 
+            documentation for the specific driver for the format.
+        </dl>
+
+    <h3>Flags</h3>
+        <dl class="message-properties">        
+            Configuration flags as a 32-bit unsigned integer for the CANAL driver.
+            See documentation for the specific driver for the format.
+        </dl> 
+
+    <h3>Details</h3>
+        <p>CANAL stands for CAN Abstraction Layer
+            and is the least common denominator for low level drivers for the Very 
+            Simple Control Protocol, VSCP. In the VSCP world CANAL driver is also 
+            called level I drivers. A CANAL driver usually abstract the interface 
+            to some hardware but can also just be a plain CAN interface.</p>
+    
+    <h3>References</h3>
+        <ul>
+            <li><a>https://docs.vscp.org/canal/latest/#/</a> - CANAL specification </li>
+            <li><a>https://docs.vscp.org/vscpd/13.1/#/level_i_drivers</a> - CANAL drivers</li>
+            <li><a>https://docs.vscp.org/</a> - documentation for VSCP</li>
+            <li><a>https://github.com/grodansparadis/node-red-contrib-vscp-tcp</a> - the nodes github repository</li>
+            <li><a>https://www.vscp.org/</a> - home of VSCP</li>
+        </ul>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('canaldrv-config',{
+        category: 'config',
+        defaults: {
+            name: {value:"",required:true},
+            path: {value:""},
+            config: {value:"0"},
+            flags: {value:"0"}
+        },
+        label: function() {
+            return this.name;
+        }
+    });
+</script>
+
+    
