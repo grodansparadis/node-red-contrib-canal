@@ -29,20 +29,14 @@
 // SOFTWARE.
 //
 
-const vscp = require('node-vscp');
 
 module.exports = function(RED) {
     function CanalDrvConfigNode(config) {
         RED.nodes.createNode(this,config);
         this.name = config.name;
-        this.filterPriority = vscp.readValue(config.filterPriority);
-        this.maskPriority = vscp.readValue(config.maskPriority);
-        this.filterClass = vscp.readValue(config.filterClass);
-        this.maskClass = vscp.readValue(config.maskClass);
-        this.filterType = vscp.readValue(config.filterType);
-        this.maskType = vscp.readValue(config.maskType);
-        this.filterGuid = config.filterGuid;
-        this.maskGuid = config.maskGuid;
+        this.path = config.path;
+        this.config = config.config;
+        this.flags = parseInt(config.flags);
     }
     RED.nodes.registerType("canaldrv-config",CanalDrvConfigNode);
 }

@@ -47,6 +47,24 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,config);
         var node = this;
 
+        var flowContext = this.context().flow;
+
+        // Retrieve the config node
+        // this.timeout = parseInt(config.timeout) || 10000;
+        // this.username = this.credentials.username || "admin";
+        // this.password = this.credentials.password || "secret";
+        // this.tls = parseInt(config.tls) || 0;
+        // this.id = config.id; // Id for node from node-red
+        
+        this.context = config.context;
+
+        // Retrieve the config node
+        this.canaldrv = RED.nodes.getNode(config.driver);
+        debuglog("Name = "+this.canaldrv.name);
+        debuglog("Path = "+this.canaldrv.path);
+        debuglog("Config = "+this.canaldrv.config);
+        debuglog("Flags = "+this.canaldrv.flags);
+
         //////////////////////////////////////////////////////////////
         //           Input from driver received here
         //////////////////////////////////////////////////////////////
