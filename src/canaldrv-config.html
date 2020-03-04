@@ -40,6 +40,17 @@ SOFTWARE.
         <label for="node-config-input-flags"><i class="fa fa-filter"></i> Flags</label>
         <input type="text" id="node-config-input-flags">
     </div>
+    <div class="form-row">
+        <label style="margin-left: 100px; width: 70%">
+            <input
+                type="checkbox"
+                id="node-input-tls"
+                placeholder=""
+                style="width: 20px; margin: -4px 0 0 0;"
+            />
+            Enable secure (SSL/TLS) connection
+        </label>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="canaldrv-config">
@@ -92,7 +103,8 @@ SOFTWARE.
             name: {value:"",required:true},
             path: {value:""},
             config: {value:"0"},
-            flags: {value:"0"}
+            flags: {value:"0"},
+            tls: {value:"0"}
         },
         label: function() {
             return this.name;

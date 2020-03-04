@@ -33,27 +33,43 @@
 
 <script type="text/html" data-template-name="canal">
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <label for="node-input-driver"><i class="icon-tag"></i> Driver</label>
+        <input type="text" id="node-input-driver" placeholder="CANAL Driver">
     </div>
     <div class="form-row">
-        <label for="node-input-driver"><i class="icon-tag"></i> Driver</label>
-        <input type="text" id="node-input-driver" placeholder="Driver">
+        <label style="margin-left: 100px; width: 70%">
+            <input
+                type="checkbox"
+                id="node-input-bvscp"
+                placeholder=""
+                style="width: 20px; margin: -4px 0 0 0;"
+            />
+            Use VSCP translation
+        </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
 <script type="text/html" data-help-name="canal">
-    <p>A node that send and receive CAN messages to/from a CANAL driver. A CAN message
+    <p>A node that send and receive CAN messages (and VSCP events) to/from a CANAL driver. A CAN message
         is the least common denominator when it comes to network transport for VSCP and
         this node can therefore be used to send/receive level I VSCP events.
     </p>
     <p>
         CANAL stands for CAN Abstraction Layer. VSCP stands for Very Simple Control Protocol.
     </p>
+    <p>
+        Select Use VSCP translation to make it possible to send VSCP events
+        directly. This also automatically translate CAN messages to
+        events on the output.
+    </p>    
 
     <h3>Inputs</h3>
     <dl class="message-properties">
-        <dd> the payload is the message to send to the configured CANAL driver. 
+        <dd> the payload is the message (or VSCP event) to send to the configured CANAL driver. 
         It can either be a JSON object or a string.
         </dd>
         <dt class="optional">payload <span class="property-type">object</span></dt>
@@ -99,6 +115,23 @@
 </pre>
             </p>
         </dd>
+        <dd>
+            If <b>'Use VSCP translation'</b> is selected then it is possible to directly send VSCP 
+            events. VSCP events have the following format
+        </dd>
+        <dd>
+<pre>
+{   "vscpHead":0,
+    "vscpObId":0,
+    "vscpClass":10,
+    "vscpType":6,
+    "vscpGuid":"ff:ee:dd:cc:bb:aa:99:88:77:66:55:44:33:22:11:00",
+    "vscpTimeStamp":1234567,
+    "vscpDateTime":"2018-03-03T12:01:40Z",
+    "vscpData":[1,2,3,4],
+}  
+</pre>             
+        </dd>    
     </dl>
 
     <h3>Outputs</h3>
@@ -125,7 +158,24 @@
         <li> <b>dlc</b> - Number of data bytes, 0-8. </li>           
         <li> <b>data</b> - An array, comma separated list or buffer with data bytes. Set to null if no data.</li>
     </ul>  
-    </dd>          
+    </dd> 
+    <dd>
+        If <b>'Use VSCP translation'</b> is selected then output CAN messages will automatically be translated to VSCP 
+        events. VSCP events have the following format
+    </dd>
+    <dd>    
+<pre>
+{   "vscpHead":0,
+    "vscpObId":0,
+    "vscpClass":10,
+    "vscpType":6,
+    "vscpGuid":"ff:ee:dd:cc:bb:aa:99:88:77:66:55:44:33:22:11:00",
+    "vscpTimeStamp":1234567,
+    "vscpDateTime":"2018-03-03T12:01:40Z",
+    "vscpData":[1,2,3,4],
+ }  
+</pre>             
+    </dd>         
     </ol>
 </script>
 
@@ -137,12 +187,13 @@
         defaults: {
             name: {value:""},
             driver: {value:"", type:"canaldrv-config", required:true},
+            bvscp: {value: 0}
         },
         inputs:1,
         outputs:1,
         icon: "font-awesome/fa-chain",
         label: function() {
-            return this.name||"canal";
+            return this.name||"CANAL";
         }
     });
 </script>

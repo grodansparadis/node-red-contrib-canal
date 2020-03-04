@@ -34,6 +34,8 @@
 const CANAL = require('node-canal');
 const can = new CANAL.CNodeCanal();
 
+const vscp = require('node-vscp');
+
 // Debug:
 // https://nodejs.org/api/util.html
 // export NODE_DEBUG=canal  for all debug events
@@ -49,13 +51,13 @@ module.exports = function(RED) {
 
         var flowContext = this.context().flow;
 
-        // Retrieve the config node
-        // this.timeout = parseInt(config.timeout) || 10000;
-        // this.username = this.credentials.username || "admin";
-        // this.password = this.credentials.password || "secret";
-        // this.tls = parseInt(config.tls) || 0;
-        // this.id = config.id; // Id for node from node-red
+        debuglog(config);
+        this.name = config.name;
+        this.bvscp = config.bvscp || false; // VSCP message/event translation
         
+        debuglog("bvscp = "+this.bvscp);
+        debuglog("node name = "+this.name);
+
         this.context = config.context;
 
         // Retrieve the config node
@@ -70,7 +72,7 @@ module.exports = function(RED) {
         //////////////////////////////////////////////////////////////
         const callback = (canmsg) => { 
 
-            debuglog(new Date, canmsg);
+            debuglog("Receiving : ",new Date, canmsg);
 
             // If this is pre-1.0, 'send' will be undefined, 
             // so fallback to node.send
@@ -79,170 +81,236 @@ module.exports = function(RED) {
             }
 
             var msg = {};
-            msg.payload = canmsg;
+
+            if ( this.bvscp ) {
+
+                debuglog("VSCP");
+
+                msg.canmsg = canmsg;
+                msg.payload = vscp.convertCanMsgToEvent(canmsg);
+
+                debuglog("msg.canmsg = ", msg.canmsg);
+                debuglog("msg.payload = ", msg.payload);
+            }
+            else {
+                
+                debuglog("CAN");
+
+                msg.payload = canmsg;
+
+                // Add compatible fields so non VSCP users
+                // can find this useful as well.
+                // msg.payload.id = canmsg.id;
+                // if ( 'undefined' === typeof msg.payload.flags ) {
+                //     msg.payload.flags = 0;
+                // }
+
+                debuglog("msg.payload = ", msg.payload);
+            }
+
+            // Let the user enjoy it
+            debuglog("Send");
             this.send(msg);
         };
 
-        this.status({fill:"red",shape:"dot",text:"node-red:common.status.closed"});
+        this.status({fill:"red",shape:"dot",text:"closed"});
 
         // Init. connection to driver
-        var rv = can.init("/home/akhe/development/VSCP/vscpl1drv-socketcan/linux/vscpl1drv-socketcan.so.1.1.0",
-                            "vcan0",
-                            0,
+        // Debug: "/home/akhe/development/VSCP/vscpl1drv-socketcan/linux/vscpl1drv-socketcan.so.1.1.0"
+        var rv = can.init(this.canaldrv.path,
+                            this.canaldrv.config,
+                            this.canaldrv.flags,
                             callback );
 
-        if ( CANAL.CANAL_ERROR_SUCCESS == rv ) {
-            this.status({fill:"yellow",shape:"dot",text:"node-red:common.status.initialized"});
+        debuglog("init rv = ", rv);                                
+
+        if ( CANAL.CANAL_ERROR_SUCCESS != rv ) {
+            this.status({fill:"red",shape:"dot",text:"Failed initialization"});
+            this.error("Failed to init CANAL driver.");
+            return;
         }     
 
-        // Ooen the connection                
+        debuglog("Ready to open driver.");
+        // Open the connection                
         rv = can.open();
         if ( CANAL.CANAL_ERROR_SUCCESS == rv ) {
-            this.status({fill:"green",shape:"dot",text:"node-red:common.status.open"});
+            this.status({fill:"green",shape:"dot",text:"open"});
         }
         else {
-            this.status({fill:"red",shape:"dot",text:"node-red:common.status.closed"});
-            // ERROR
+            this.status({fill:"red",shape:"dot",text:"open failed"});
+            this.error("Failed to open CANAL driver.");
+            return;
         }
 
         node.on('input', function(msg, send, done) {
 
             debuglog(msg.payload);
 
+            var frame = {};
+            frame.rtr = false;
+            frame.ext = false;
+            frame.obid = 0;   
+            frame.flags = 0;
+            var hrTime = process.hrtime();
+            frame.timestamp = (hrTime[0] * 1000000 +
+                               hrTime[1] / 1000);
+
             // OK with string form
             if ( typeof msg.payload === 'string' ) {
 
-                debuglog("Message format = string");
+                debuglog("Message format == string");
 
-                // <can_id>#{R|data}
-                // for CAN 2.0 frames
-                // 
-                // <can_id>##<flags>{data}
-                // for CAN FD frames
-                if( msg.payload && 
-                    (msg.payload.indexOf("##") != -1 ) ) {   // CAN FD frame
-                    
-                    debuglog("FD Frame");
-
-                    var frame = {};
-
-                    frame.canid  = parseInt(msg.payload.split("##")[0],16);
-                    debuglog("frame.id " + frame.id);
-                    let data     = msg.payload.split("##")[1];
-                    debuglog("data " + data);
-                    frame.data   = Buffer.from(data,"hex");
-                    frame.dlc    = frame.data.length;
-                    if ( frame.dlc > 64 ) {
-
-                        if (done) {
-                            // Node-RED 1.0 compatible
-                            done("Invalid CAN FD frame length " + frame.dlc);
-                        } else {
-                            // Node-RED 0.x compatible
-                            node.error("Invalid CAN FD frame length " + frame.dlc, msg);
-                        }
-                    
-                    }		
-                    
-                    msg.payload = vscp.convertCanMsgToEvent(frame);
-
-                    // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-                    send = send || function() {
-                        node.send.apply(node, arguments)
-                    }
-            
-                    rv = can.send({
-                            id: i,
-                            flags: CANAL.CANAL_IDFLAG_EXTENDED,
-                            obid: 33,
-                            timestamp: (hrTime[0] * 1000000 + hrTime[1] / 1000),
-                            data: [i,i,i,i,i,i,i,i],
-                            ext: true,
-                            rtr: false
-                    });
-
-                    done();
-                }
-                else if( msg.payload && 
-                    (msg.payload.indexOf("#") != -1 ) ) {
-
-                    debuglog("CAN Frame");
-
-                    var frame = {};
-
-                    let id = msg.payload.split("#")[0];
-                    frame.canid  = parseInt(id,16);
-                    frame.ext = true;
-                    let data  = msg.payload.split("#")[1];
-                    debuglog("R check",typeof data,data.indexOf("R"));
-                    if ( -1 == data.indexOf("R") ) {
-                        debuglog( "CAN: ",frame.id,data);                        
-                        var buffer   = Buffer.from(data,"hex");
-                        frame.dlc    = buffer.length;
-                        frame.data = buffer;
-                        //frame.data = Array.prototype.slice.call(buffer, 0);
-                        debuglog(frame.data);
-                        if ( frame.dlc > 8 ) {
-                            if (done) {
-                                // Node-RED 1.0 compatible
-                                done("Invalid CAN frame length " + frame.dlc);
-                            } else {
-                                // Node-RED 0.x compatible
-                                node.error("Invalid CAN frame length " + frame.dlc, msg.payload);
-                            }	
-                        }
-                        debuglog(frame);
-                    }
-                    else {
-                        // Remote transmission request
-                        debuglog("Remote transmission request");
-                        frame.dlc  = 0;
-                        frame.data = null;                        
-                    }
-
-                    // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-                    // send = send || function() {
-                    //     node.send.apply(node, arguments)
-                    // }
-        
+                if ( this.bvscp ) {
+                    debuglog("String input: ", msg.payload);               
+                    var ev = new vscp.Event();
+                    ev.setFromString(msg.payload);
+                    debuglog("Event object: ", ev);
+                    frame = vscp.convertEventToCanMsg(ev);
+                    debuglog("msg.payload",frame);    
                 }
                 else {
 
-                    if (done) {
-                        // Node-RED 1.0 compatible
-                        done("Invalid CAN frame");
-                    } else {
-                        // Node-RED 0.x compatible
-                        node.error("Invalid CAN frame", msg);
+                    // <can_id>#{R|data}
+                    // for CAN 2.0 frames
+                    // 
+                    // <can_id>##<flags>{data}
+                    // for CAN FD frames
+                    if( msg.payload && 
+                        (msg.payload.indexOf("##") != -1 ) ) {   // CAN FD frame
+                        
+                        debuglog("FD Frame");
+
+                        frame.id  = parseInt(msg.payload.split("##")[0],16);
+                        debuglog("frame.id " + frame.id);
+                        let data     = msg.payload.split("##")[1];
+                        debuglog("data " + data);
+                        frame.data   = Buffer.from(data,"hex");
+                        frame.dlc    = frame.data.length;
+                        if ( frame.dlc > 64 ) {
+
+                            if (done) {
+                                // Node-RED 1.0 compatible
+                                done("Invalid CAN FD frame length " + frame.dlc);
+                            } else {
+                                // Node-RED 0.x compatible
+                                node.error("Invalid CAN FD frame length " + frame.dlc, msg);
+                            }
+                        
+                        }		
+                        
+                        debuglog(frame);
                     }
-                    
+                    else if( msg.payload && 
+                        (msg.payload.indexOf("#") != -1 ) ) {
+
+                        debuglog("CAN Frame");
+
+                        let id = msg.payload.split("#")[0];
+                        frame.id  = parseInt(id,16);
+                        if ( id.length > 3 ) {
+                            frame.ext = true;
+                        }
+    
+                        let data  = msg.payload.split("#")[1];
+
+                        debuglog("R check",typeof data,data.indexOf("R"));
+                        
+                        if ( -1 == data.indexOf("R") ) {
+                            debuglog( "CAN: ",frame.id,data);                        
+                            var buffer   = Buffer.from(data,"hex");
+                            frame.data = buffer;
+                            frame.sizeData    = frame.data.length;
+                            debuglog(frame.data);
+                            if ( frame.data.length > 8 ) {
+                                if (done) {
+                                    // Node-RED 1.0 compatible
+                                    done("Invalid CAN frame length " + frame.data.length, msg.payload);
+                                } else {
+                                    // Node-RED 0.x compatible
+                                    node.error("Invalid CAN frame length " + frame.data.length, msg.payload);
+                                }	
+                            }
+                            
+                            debuglog(frame);
+                        }
+                        else {
+                            // Remote transmission request
+                            debuglog("Remote transmission request");
+                            frame.dlc  = 0;
+                            frame.data = null;                        
+                        }
+
+                    }
+                    else {
+
+                        // This is a string format we don't recognize
+
+                        if (done) {
+                            // Node-RED 1.0 compatible
+                            done("Invalid CAN frame (string)");
+                        } else {
+                            // Node-RED 0.x compatible
+                            node.error("Invalid CAN frame (string)", msg);
+                        }
+                        
+                    }
+
                 }
 
             }
             else if ( typeof msg.payload === 'object' ) {
-                ;
+
+                debuglog("Message format == object");
+
+                if ( this.bvscp ) {
+                    debuglog("JSON object",msg.payload);
+                    debuglog("Data (msg.payload)",msg.payload.vscpData, Array.isArray(msg.payload.vscpData));
+                    var ev = new vscp.Event(msg.payload);
+                    debuglog(ev);
+                    debuglog("Data (Event)",ev.vscpData);
+                    frame = vscp.convertEventToCanMsg(ev);
+                    debuglog(frame);
+                }
+                else { 
+                    // A standard CAN object is different from
+                    // a CANAL object so we ned to translate
+                    frame = msg.payload;
+                    if ( 'number' !== msg.payload.sizeData) {
+                        frame.sizeData = frame.data.length;
+                        frame.dlc = frame.data.length;
+                    }
+                    // Try to be forgiving to 'old people'
+                    if ( 'number' === msg.payload.canid) {
+                        frame.id = frame.canid;
+                    }
+                    if (frame.ext) {
+                        frame.flags = CANAL.CANAL_IDFLAG_EXTENDED;
+                    }
+                    if (frame.rtr) {
+                        frame.flags = CANAL.CANAL_IDFLAG_RTR;
+                    }
+                }
+            }
+            else if (msg.payload instanceof vscp.Event ) {
+                debuglog("Event");
+                frame = vscp.convertEventToCanMsg(msg.payload);
+                debuglog("frame");
             }
             // Invalid format
             else {
-                node.error("Payload has invalid format (should be canmsg object or string)", msg);
+                if (done) {
+                    // Node-RED 1.0 compatible
+                    done("Payload has invalid format (should be canmsg object or string)", msg);
+                } else {
+                    // Node-RED 0.x compatible
+                    node.error("Payload has invalid format (should be canmsg object or string)", msg);
+                }
             }
 
-            // If this is pre-1.0, 'send' will be undefined, so fallback to node.send
-            send = send || function() {
-                node.send.apply(node, arguments)
-            }
-            
-            rv = can.send({
-                id: i,
-                flags: CANAL.CANAL_IDFLAG_EXTENDED,
-                obid: 33,
-                timestamp: (hrTime[0] * 1000000 + hrTime[1] / 1000),
-                data: [i,i,i,i,i,i,i,i],
-                ext: true,
-                rtr: false
-            });
-
+            debuglog("Sending :",frame);
+            rv = can.send(frame);
             done();
+
         });
 
         this.on('close', function(removed, done) {

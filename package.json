@@ -38,7 +38,8 @@
   "homepage": "https://github.com/grodansparadis/node-red-contrib-canal#readme",
   "dependencies": {
     "bindings": "^1.5.0",
-    "node-canal": "^1.0.3",
+    "node-canal": "^1.0.7",
+    "node-vscp": "^1.1.12",
     "util": "^0.12.2"
   },
   "devDependencies": {
