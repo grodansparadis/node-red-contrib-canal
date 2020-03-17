@@ -28,28 +28,7 @@ Install with
 ```
 or install from the node-red user interface.
 
-
-```
-
 ## Usage
-
-Generally below we use the [Socketcan CANAL driver](https://docs.vscp.org/vscpd/13.1/#/level1_driver_socketcan) to illustrated examples. This driver is chosen because it is easy to use on a system without any extra hardware which means everyone can take it for a test. candump/cansend from the [can-utils](https://github.com/linux-can/can-utils) package is useful tools. Install can-utils with 
-
-```bash
-sudo apt update
-sudo apt install can-utils
-```
-
-To [set up a test CAN interface](https://en.wikipedia.org/wiki/SocketCAN)(_vcan0_) use
-
-```bash
-modprobe can
-modprobe can_raw
-modprobe vcan
-sudo ip link add dev vcan0 type vcan
-sudo ip link set up vcan0
-ip link show vcan0
-```
 
 The CANAL node have one input that is used to send CAN messages to the CANAL driver and one output that receive CAN messages from the driver.
 
@@ -210,6 +189,30 @@ For work with VSCP the constants for events (VSCL classes and types) may be usef
 
 ## Samples
 
+Here is a simple sample flow that use the [vscpl1drv_socketcan](https://github.com/grodansparadis/vscpl1drv-socketcan)
+
+```javascript
+[{"id":"ee3919bd.6af248","type":"canal","z":"295a49d7.d930e6","name":"CANAL","driver":"d5d84513.4b7e8","bvscp":false,"x":380,"y":120,"wires":[["fdbf3cc8.2b73"]]},{"id":"974a318d.1e024","type":"inject","z":"295a49d7.d930e6","name":"CAN object","topic":"","payload":"{\"id\":123,\"flags\":1,\"obid\":33,\"timestamp\":0,\"data\":[11,22,33,44,55,66,77,88]}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":130,"y":120,"wires":[["ee3919bd.6af248"]]},{"id":"fdbf3cc8.2b73","type":"debug","z":"295a49d7.d930e6","name":"Debug","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","targetType":"msg","x":410,"y":200,"wires":[]},{"id":"5127a4e3.0d6bcc","type":"inject","z":"295a49d7.d930e6","name":"std CAN String","topic":"","payload":"123#11223344","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":120,"y":160,"wires":[["ee3919bd.6af248"]]},{"id":"644daf4a.0ff268","type":"inject","z":"295a49d7.d930e6","name":"ext CAN String","topic":"","payload":"120A0600#11","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":120,"y":200,"wires":[["ee3919bd.6af248"]]},{"id":"43fa6ff1.5a451","type":"inject","z":"295a49d7.d930e6","name":"VSCP object","topic":"","payload":"{\"vscpHead\":80,\"vscpClass\":10,\"vscpType\":6,\"vscpGuid\":\"00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:2a\",\"vscpObid\":0,\"vscpData\":[11,22,33,44,55],\"vscpTimeStamp\":34565634,\"vscpDateTime\":\"2020-02-24T11:10:59.807Z\"}","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":110,"y":360,"wires":[["4b35168.93e0d68"]]},{"id":"da3c6507.9aefa","type":"inject","z":"295a49d7.d930e6","name":"VSCP string","topic":"","payload":"0,20,3,,,,0:1:2:3:4:5:6:7:8:9:10:11:12:13:14:15,0,1,35","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":110,"y":400,"wires":[["4b35168.93e0d68"]]},{"id":"4b35168.93e0d68","type":"canal","z":"295a49d7.d930e6","name":"CANAL (VSCP)","driver":"d5d84513.4b7e8","bvscp":true,"x":400,"y":360,"wires":[["8a1901de.826508"]]},{"id":"8a1901de.826508","type":"debug","z":"295a49d7.d930e6","name":"Debug","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","targetType":"msg","x":410,"y":460,"wires":[]},{"id":"d5d84513.4b7e8","type":"canaldrv-config","z":"","name":"socketcan - vcan0","path":"/home/akhe/development/VSCP/vscpl1drv-socketcan/linux/vscpl1drv-socketcan.so.1.1.0","config":"vcan0","flags":"0"}]
+```
+
+In the exampel flow we use the [Socketcan CANAL driver](https://docs.vscp.org/vscpd/13.1/#/level1_driver_socketcan) to illustrated examples. This driver is chosen because it is easy to use on a system without any extra hardware which means everyone can take it for a test. candump/cansend from the [can-utils](https://github.com/linux-can/can-utils) package is useful tools. Install can-utils with 
+
+```bash
+sudo apt update
+sudo apt install can-utils
+```
+
+To [set up a test CAN interface](https://en.wikipedia.org/wiki/SocketCAN)(_vcan0_) use
+
+```bash
+modprobe can
+modprobe can_raw
+modprobe vcan
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
+ip link show vcan0
+```
+
 You have a couple of samples [here](https://github.com/grodansparadis/node-canal/tree/master/samples).
 
 ---
@@ -233,7 +236,7 @@ There is plenty of other tools available in the VSCP subsystem. Check the docs a
 
 There are other node-red parts in development or already available that makes it possible to easily connect to websocket interfaces on remote VSCP daemons/servers or hosts.
 
-Checkout [node-red-contrib-vscp-tcp](https://www.npmjs.com/package/node-red-contrib-vscp-tcp) that contains nopes that connect to a remote VSCP tcp/ip host interface and send/receive events.
+Checkout [node-red-contrib-vscp-tcp](https://www.npmjs.com/package/node-red-contrib-vscp-tcp) that contains nodes that connect to a remote VSCP tcp/ip host interface and send/receive events.
 
 If you work with CAN, and especially CAN4VSCP, you might find [node-red-contrib-socketcan](https://www.npmjs.com/package/node-red-contrib-socketcan) and  [node-red-contrib-canal](https://www.npmjs.com/package/node-red-contrib-canal) useful.
 
