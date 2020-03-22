@@ -144,6 +144,7 @@ module.exports = function(RED) {
 
         node.on('input', function(msg, send, done) {
 
+            var ev = null;
             debuglog(msg.payload);
 
             var frame = {};
@@ -162,7 +163,7 @@ module.exports = function(RED) {
 
                 if ( this.bvscp ) {
                     debuglog("String input: ", msg.payload);               
-                    var ev = new vscp.Event();
+                    ev = new vscp.Event();
                     ev.setFromString(msg.payload);
                     debuglog("Event object: ", ev);
                     frame = vscp.convertEventToCanMsg(ev);
@@ -265,7 +266,7 @@ module.exports = function(RED) {
                 if ( this.bvscp ) {
                     debuglog("JSON object",msg.payload);
                     debuglog("Data (msg.payload)",msg.payload.vscpData, Array.isArray(msg.payload.vscpData));
-                    var ev = new vscp.Event(msg.payload);
+                    ev = new vscp.Event(msg.payload);
                     debuglog(ev);
                     debuglog("Data (Event)",ev.vscpData);
                     frame = vscp.convertEventToCanMsg(ev);
