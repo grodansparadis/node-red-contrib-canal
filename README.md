@@ -1,15 +1,14 @@
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
-[![Travis Build Status](https://api.travis-ci.org/grodansparadis/node-red-contrib-vscp-tcp.svg?branch=master)](https://travis-ci.org/grodansparadis/node-red-contrib-vscp)
-
-<img src="https://vscp.org/images/logo.png" width="100">
-
 # node-red-contrib-canal
 
+![VSCP-LOGO](https://vscp.org/images/logo_100.png)
+
+
+
+This is a node that interface a CANAL driver.
+
+__Tested with node v11.8.0 and below__
+
 ![CANAL](./images/node-red-contrib-canal.png)
-
-This is a node that interface the CANAL driver. 
-
-__Tested in node v11.8.0 and below__
 
 This node is a CANAL interface for node-red. CANAL stands for [CAN Abstraction Layer](https://docs.vscp.org/#canal) and is the least common denominator for low level drivers for the [Very Simple Control Protocol, VSCP](https://www.vscp.org). In the VSCP world CANAL driver is also called level I drivers. 
 
@@ -24,15 +23,16 @@ You always send and receive CAN messages through a CANAL interface. This is just
 Install with
 
 ```bash
-    npm install node-contrib-vscp-canal
+npm install node-contrib-vscp-canal
 ```
+
 or install from the node-red user interface.
 
 ## Usage
 
 The CANAL node have one input that is used to send CAN messages to the CANAL driver and one output that receive CAN messages from the driver.
 
-You have the option to automatically translate VSCP events to/from the node by selecting ** Use VSCP translation** in the configuration. This is convenient if you work with VSCP hardware, but you have always the option to use **node-red-contrib-vscp** as an alternative as it contains nods that does the translation to.
+You have the option to automatically translate VSCP events to/from the node by selecting **Use VSCP translation** in the configuration. This is convenient if you work with VSCP hardware, but you have always the option to use **node-red-contrib-vscp** as an alternative as it contains nods that does the translation to.
 
 The configuration let you define CANAL drivers on a system level and then select which driver to use for the moment. This is often convenient and time saving when you work with different CANAL drivers.
 
