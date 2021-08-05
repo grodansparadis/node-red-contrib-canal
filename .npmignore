@@ -1,4 +1,7 @@
 .node-red
 .git
+.github
 .gitignore
+.vscode
 node-red-contrib-canal
+.travis.yml
