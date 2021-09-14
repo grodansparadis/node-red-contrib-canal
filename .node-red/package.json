@@ -4,10 +4,10 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
-        "node-canal": "^1.0.8",
+        "node-canal": "^1.0.13",
         "node-red": "^2.0.6"
     },
     "devDependencies": {
-        "npm-check-updates": "^10.2.2"
+        "npm-check-updates": "^11.8.5"
     }
 }
