@@ -5,7 +5,7 @@
     "private": true,
     "dependencies": {
         "node-canal": "^1.0.8",
-        "node-red": "^1.2.5"
+        "node-red": "^2.0.6"
     },
     "devDependencies": {
         "npm-check-updates": "^10.2.2"
