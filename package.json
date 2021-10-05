@@ -1,12 +1,11 @@
 {
   "name": "node-red-contrib-canal",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "CANAL (CAN abstraction error) interface node for node-red",
   "main": "index.js",
   "scripts": {
     "start": "mkdir -p .node-red/node_modules && ln -sf $PWD $PWD/.node-red/node_modules/node-red-contrib-canal && node-red -u .node-red",
-    "lint": "eslint .",
-    "update-dependencies": "ncu -u && npm install"
+    "lint": "eslint ."
   },
   "node-red": {
     "nodes": {
@@ -37,21 +36,21 @@
   },
   "homepage": "https://github.com/grodansparadis/node-red-contrib-canal#readme",
   "dependencies": {
-    "bindings": "^1.5.0",
-    "lodash": "^4.17.21",
-    "minimist": "^1.2.5",
-    "node-canal": "^1.0.13",
-    "node-vscp": "^1.1.20",
-    "util": "^0.12.4"
+    "bindings": ">=1.5.0",
+    "lodash": ">=4.17.21",
+    "minimist": ">=1.2.5",
+    "node-canal": ">=1.0.13",
+    "node-vscp": ">=1.1.20",
+    "util": ">=0.12.4"
   },
   "devDependencies": {
-    "chai": "^4.3.4",
-    "eslint": "^7.32.0",
-    "mocha": "^9.1.1",
-    "node-red": "^2.0.6",
-    "node-red-contrib-mock-node": "^0.5.2",
-    "node-red-node-test-helper": "^0.2.7",
-    "npm-check-updates": "^11.8.5",
-    "should": "^13.2.3"
+    "chai": ">=4.3.4",
+    "eslint": ">=7.32.0",
+    "mocha": ">=9.1.1",
+    "node-red": ">=2.0.6",
+    "node-red-contrib-mock-node": ">=0.5.2",
+    "node-red-node-test-helper": ">=0.2.7",
+    "npm-check-updates": ">=11.8.5",
+    "should": ">=13.2.3"
   }
 }
