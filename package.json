@@ -45,6 +45,5 @@
   },
   "@comment devDependencies": "Moved to devdeps.txt",
   "devDependencies": {
-    "should": ">=13.2.3"
-  }
+      }
 }
