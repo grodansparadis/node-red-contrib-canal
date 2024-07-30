@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-canal",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "CANAL (CAN abstraction error) interface node for node-red",
   "main": "index.js",
   "scripts": {
@@ -45,5 +45,5 @@
   },
   "@comment devDependencies": "Moved to devdeps.txt",
   "devDependencies": {
-      }
+  }
 }
